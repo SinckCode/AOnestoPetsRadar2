@@ -10,5 +10,15 @@ services:
     volumes:
       - postgres_data_db:/var/lib/postgresql
 
+  redis:
+    image: redis:7-alpine
+    container_name: PetRadarRedis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
 volumes:
   postgres_data_db:
+  redis_data:

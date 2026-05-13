@@ -23,10 +23,15 @@
     "migration:run": "npm run typeorm -- migration:run"
   },
   "dependencies": {
+    "@nestjs/cache-manager": "^3.1.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
+    "@types/cache-manager": "^4.0.6",
+    "applicationinsights": "^3.14.0",
+    "cache-manager": "^7.2.8",
+    "cache-manager-redis-yet": "^5.1.5",
     "dotenv": "^17.3.1",
     "env-var": "^7.5.0",
     "nodemailer": "^8.0.2",

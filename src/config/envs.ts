@@ -11,5 +11,7 @@ export const envs = {
     DB_NAME: env.get("DB_NAME").required().asString(),
     DB_PORT: env.get("DB_PORT").required().asPortNumber(),
     DB_HOST: env.get("DB_HOST").required().asString(),
-    DB_USER: env.get("DB_USER").required().asString()
+    DB_USER: env.get("DB_USER").required().asString(),
+    REDIS_URL: env.get("REDIS_URL").asString() ?? "redis://localhost:6379",
+    APPINSIGHTS_INSTRUMENTATIONKEY: env.get("APPINSIGHTS_INSTRUMENTATIONKEY").asString() ?? ""
 }

@@ -1,3 +1,9 @@
+import * as appInsights from 'applicationinsights';
+
+if (process.env.APPINSIGHTS_INSTRUMENTATIONKEY) {
+  appInsights.setup(process.env.APPINSIGHTS_INSTRUMENTATIONKEY).start();
+}
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 

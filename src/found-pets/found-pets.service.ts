@@ -19,6 +19,10 @@ export class FoundPetsService {
         private readonly emailService: EmailService
     ) {}
 
+    async findAll() {
+        return this.foundPetRepository.find();
+    }
+
     async createFoundPet(foundPet : FoundPetCDto){
 
         const newFoundPet = this.foundPetRepository.create({

@@ -17,6 +17,12 @@ export class LostPetsService {
         private readonly emailService: EmailService
     ) {}
 
+    async findAll() {
+        return this.lostPetRepository.find({
+            where: { is_active: true }
+        });
+    }
+
     async createLostPet(lostPet : LostPetCDto): Promise<Boolean>{
 
         const newLostPet = this.lostPetRepository.create({
