@@ -1,98 +1,152 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Pet Radar API - Examen Parcial II
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Sistema de búsqueda geo-referenciada de mascotas perdidas y encontradas usando NestJS, PostGIS y Redis.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Características
 
-## Description
+- **Búsqueda por Radio**: Encuentra mascotas perdidas activas dentro de 500 metros usando PostGIS
+- **Caché Redis**: Endpoints GET cacheados con TTL de 60 segundos
+- **Monitoreo**: Integración con Azure Application Insights
+- **Containerización**: Dockerfile multi-stage optimizado para producción
+- **CI/CD**: GitHub Actions para build automático y push a GitHub Container Registry (GHCR)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Requisitos
 
-## Project setup
+- Node.js 20+
+- Docker & Docker Compose
+- PostgreSQL 16+ con PostGIS
+- Redis 7+
+
+## Configuración del Proyecto
+
+### 1. Instalar dependencias
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+### 2. Configurar variables de entorno
+
+Copiar `.env.example` a `.env` y configurar:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+### 3. Iniciar servicios (PostgreSQL + Redis)
+
+```bash
+docker-compose up -d
+```
+
+### 4. Ejecutar migraciones (si es necesario)
+
+```bash
+npm run migration:run
+```
+
+## Ejecutar la aplicación
+
+```bash
+# Desarrollo
+npm run start:dev
+
+# Producción (compilar primero)
+npm run build
+npm run start:prod
+```
+
+La API estará disponible en `http://localhost:3000/api`
+
+## Endpoints de la API
+
+### Mascotas Perdidas
+
+- **GET** `/api/lost-pets` - Listado de mascotas perdidas activas (cacheado en Redis por 60s)
+- **POST** `/api/lost-pets` - Crear una mascota perdida
+
+### Mascotas Encontradas
+
+- **GET** `/api/found-pets` - Listado de mascotas encontradas (cacheado en Redis por 60s)
+- **POST** `/api/found-pets` - Crear una mascota encontrada + búsqueda automática de coincidencias por radio
+
+### Búsqueda por Radio
+
+Cuando se reporta una mascota encontrada (`POST /api/found-pets`), el sistema:
+1. Almacena la mascota encontrada en la BD
+2. Busca automáticamente mascotas perdidas activas en un radio de 500 metros
+3. Usa PostGIS ST_DWithin con distancia en metros (::geography)
+4. Retorna las coincidencias ordenadas por distancia
+
+## Ejecutar pruebas
 
 ```bash
 # unit tests
-$ npm run test
+npm run test
 
 # e2e tests
-$ npm run test:e2e
+npm run test:e2e
 
 # test coverage
-$ npm run test:cov
+npm run test:cov
 ```
 
-## Deployment
+## Docker
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Construir imagen Docker
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker build -t animalitos-lost-api:latest .
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Ejecutar contenedor
 
-## Resources
+```bash
+docker run -p 3000:3000 \
+  -e DB_HOST=host.docker.internal \
+  -e REDIS_URL=redis://host.docker.internal:6379 \
+  animalitos-lost-api:latest
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Integración Continua (GitHub Actions)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+El repositorio incluye un workflow automático (`.github/workflows/docker-publish.yml`) que:
 
-## Support
+1. Se dispara en cada push a `main`
+2. Construye la imagen Docker
+3. Publica automáticamente en GitHub Container Registry (GHCR) en: `ghcr.io/sinckcode/aonestopetsradar`
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Para ver las imágenes construidas:
+```bash
+docker login ghcr.io
+docker pull ghcr.io/sinckcode/aonestopetsradar:latest
+```
 
-## Stay in touch
+## Stack Tecnológico
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **Framework**: NestJS 11+
+- **ORM**: TypeORM 0.3+
+- **Base de Datos**: PostgreSQL 16+ con PostGIS
+- **Caché**: Redis 7+ con @nestjs/cache-manager
+- **Monitoreo**: Azure Application Insights
+- **Containerización**: Docker & Docker Compose
+- **CI/CD**: GitHub Actions
 
-## License
+## Examen Parcial II - Requisitos Completados
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+✅ 1. Implementación de Redis (caché en endpoints GET)
+- GET `/lost-pets` con caché Redis (TTL 60s)
+- GET `/found-pets` con caché Redis (TTL 60s)
+
+✅ 2. Implementación de Application Insights
+- Integración de Azure Application Insights para monitoreo y telemetría
+
+✅ 3. Contenerización con Docker
+- Dockerfile multi-stage para compilación y ejecución optimizada
+
+✅ 4. GitHub Actions (build y push a GHCR)
+- Workflow automático de CI/CD con publicación en GitHub Container Registry
+
+✅ 5. Búsqueda por Radio (funcionalidad central)
+- Búsqueda automática de mascotas perdidas activas dentro de 500m
+- Uso de ST_DWithin de PostGIS con cast a ::geography para distancias en metros
