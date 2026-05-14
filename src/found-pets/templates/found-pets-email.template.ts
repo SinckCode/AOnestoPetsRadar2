@@ -47,7 +47,7 @@ style="background:#0a0a0a;border-radius:22px;overflow:hidden;border:1px solid rg
 </td>
 
 <td align="right" style="font-size:12px;color:#ffffffaa;letter-spacing:2px;font-weight:600;">
-PETRADAR ALERT SYSTEM
+PETRADAR ALERT SYSTEM |
 </td>
 
 </tr>
