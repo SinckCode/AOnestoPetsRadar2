@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseInterceptors, Param } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { LostPetsService } from './lost-pets.service';
 import type { LostPetCDto } from 'src/core/interfaces/lost-pet.interfaces';
@@ -12,6 +12,11 @@ export class LostPetsController {
     @Get()
     async findAll() {
         return this.LostPetsService.findAll();
+    }
+
+    @Get(':lat/:lon/radius')
+    async findByRadius(@Param('lat') lat: number, @Param('lon') lon: number) {
+        return this.LostPetsService.findByRadius(parseFloat(lat.toString()), parseFloat(lon.toString()), 500);
     }
 
     @Post()

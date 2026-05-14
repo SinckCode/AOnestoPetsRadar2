@@ -43,6 +43,38 @@ export class LostPetsService {
         return pets;
     }
 
+    async findByRadius(lat: number, lon: number, radiusInMeters: number = 500): Promise<any[]> {
+        logger.info(`[LostPetsService] Buscando mascotas perdidas activas en radio de ${radiusInMeters}m desde (${lat}, ${lon})`);
+
+        try {
+            const nearbyLostPets = await this.lostPetRepository.query(
+                `
+                    SELECT
+                        lp.*,
+                        ST_Distance(
+                            lp.location::geography,
+                            ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
+                        ) AS distance
+                    FROM lost_pets lp
+                    WHERE lp.is_active = true
+                        AND ST_DWithin(
+                            lp.location::geography,
+                            ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                            $3
+                        )
+                    ORDER BY distance ASC
+                `,
+                [lon, lat, radiusInMeters]
+            );
+
+            logger.info(`[LostPetsService] ${nearbyLostPets.length} mascotas perdidas encontradas en radio de ${radiusInMeters}m`);
+            return nearbyLostPets;
+        } catch (error) {
+            logger.info(`[LostPetsService] Error en búsqueda por radio: ${error}`);
+            throw error;
+        }
+    }
+
     async createLostPet(lostPet : LostPetCDto): Promise<Boolean>{
         logger.info(`[LostPetsService] Creando mascota perdida: ${lostPet.name} (${lostPet.species})`);
 
