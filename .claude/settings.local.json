@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(docker --version)",
+      "Bash(docker-compose --version)",
+      "Bash(docker-compose up:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(gh workflow:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git rebase:*)",
+      "Bash(cat)",
+      "Bash(bash /tmp/clean_coauthor.sh)",
+      "Bash(git reflog:*)",
+      "Bash(git gc:*)",
+      "Bash(xargs -I {} git log {} --format=\"%B\")",
+      "Bash(git remote:*)",
+      "Bash(npm list:*)"
+    ]
+  }
+}

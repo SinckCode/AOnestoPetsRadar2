@@ -9,6 +9,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { envs } from './config/envs';
 import { dataSourceOptions } from './core/db/data.source';
 import { redisStore } from 'cache-manager-redis-yet';
+import { CacheModuleService } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     EmailModule,
     FoundPetsModule,
     LostPetsModule,
+    CacheModuleService,
     TypeOrmModule.forRoot(dataSourceOptions)
   ],
   controllers: [AppController],
